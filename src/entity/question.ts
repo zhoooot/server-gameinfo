@@ -11,7 +11,7 @@ export class Question {
     public party_id: string;
 
     @Column()
-    public question: string;
+    public content: string;
 
     @Column()
     public correct_answer: string;
@@ -28,7 +28,7 @@ export class Question {
     Question(question_id: number, party_id: string, question: string, correct_answer: string, url: string) {
         this.question_id = question_id;
         this.party_id = party_id;
-        this.question = question;
+        this.content = question;
         this.correct_answer = correct_answer;
         this.url = url;
     }
@@ -42,7 +42,7 @@ export class Question {
     }
 
     public getQuestion(): string {
-        return this.question;
+        return this.content;
     }
 
     public getCorrectAnswer(): string {

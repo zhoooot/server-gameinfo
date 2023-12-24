@@ -1,24 +1,25 @@
-import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Question } from "./question";
 
 @Entity()
 export class Party {
-    @PrimaryColumn({ unique: true}})
-    id: string;
+    @PrimaryColumn()
+    public id: string;
 
     @Column()
-    game_code: string;
+    public game_code: string;
 
     @Column()
-    invalid_at: string;
+    public invalid_at: string;
 
     @Column()
-    title: string;
+    public title: string;
 
     @OneToMany(() => Question, question => question.party_id)
-    questions: Question[];
+    public questions: Question[];
 
-    Party(game_code: string, invalid_at: string, title: string) {
+    public Party(party_id: string, game_code: string, invalid_at: string, title: string) {
+        this.id = party_id;
         this.game_code = game_code;
         this.invalid_at = invalid_at;
         this.title = title;

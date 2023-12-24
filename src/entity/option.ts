@@ -13,7 +13,7 @@ export class Option {
     public question_id: number;
 
     @Column()
-    public option: string;
+    public content: string;
 
     @ManyToOne(() => Question, question => question.options)
     public question: Question;
@@ -22,7 +22,7 @@ export class Option {
         this.option_id = option_id;
         this.party_id = party_id;
         this.question_id = question_id;
-        this.option = option;
+        this.content = option;
     }
 
     public getId(): number {
@@ -38,6 +38,6 @@ export class Option {
     }
 
     public getOption(): string {
-        return this.option;
+        return this.content;
     }
 }

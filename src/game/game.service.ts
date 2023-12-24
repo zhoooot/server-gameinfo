@@ -1,12 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientService } from 'src/client/client.service';
+import { GamedataService } from 'src/gamedata/gamedata.service';
+import { GamesettingsService } from 'src/gamesettings/gamesettings.service';
 
 @Injectable()
 export class GameService {
 
     constructor(
-        @Inject(ClientService) private readonly clientService: ClientService
-        
+        @Inject(ClientService) private readonly clientService: ClientService,
+        @Inject(GamedataService) private readonly gamedataService: GamedataService,
+        @Inject(GamesettingsService) private readonly gamesettingsService: GamesettingsService,
     ) {}
 
     createGameCode() {
@@ -18,9 +21,9 @@ export class GameService {
         return gameCode;
     }
 
-    async saveGameData() {
-        // TODO
-        throw new Error('Method not implemented.');
+    async saveGameData(gamecode: string, gamedata: any) {
+        const party = await this.gamedataService.saveParty(gamecode, gamedata.title, gamedata.questions);
+        return party;
     }
 
     onJoinGame(clientId: string, gameCode: string, username: string) {
@@ -34,30 +37,53 @@ export class GameService {
     }
 
     onGameStart(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'gameStart', {});
+        this.clientService.broadcastToRoom(gameCode, 'Let the game begins!', {
+            type: 'start',
+            gamecode: gameCode,
+            questions: this.gamedataService.getQuestions(gameCode),
+        });
     }
 
     onGameEnd(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'gameEnd', {});
+        this.clientService.broadcastToRoom(gameCode, 'Game over!', {
+            type: 'end',
+            gamecode: gameCode,
+        });
     }
 
     onGameSkip(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'gameSkip', {});
+        this.clientService.broadcastToRoom(gameCode, 'This question is skipped!', {
+            type: 'skip',
+            gamecode: gameCode,
+        });
     }
 
     onRanking(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'ranking', {});
+        this.clientService.broadcastToRoom(gameCode, 'ranking', {
+            type: 'ranking',
+            gamecode: gameCode,
+        });
     }
 
-    onShowQuestion(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'showQuestion', {});
+    async onShowQuestion(clientId: string, gameCode: string) {
+        this.clientService.broadcastToRoom(gameCode, 'showQuestion', {
+            type: 'showQuestion',
+            gamecode: gameCode,
+            question: this.gamedataService.getQuestion(gameCode, await this.gamesettingsService.getQuestionIndex(gameCode)),
+        });
     }
 
     onResult(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'result', {});
+        this.clientService.broadcastToRoom(gameCode, 'result', {
+            type: 'result',
+            gamecode: gameCode,
+        });
     }
 
     onFinalRanking(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'finalRanking', {});
+        this.clientService.broadcastToRoom(gameCode, 'finalRanking', {
+            type: 'finalRanking',
+            gamecode: gameCode,
+        });
     }
 }

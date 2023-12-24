@@ -7,6 +7,7 @@ import { Option } from 'src/entity/option';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Party, Question, Option])],
-  providers: [GamedataService]
+  providers: [GamedataService],
+  exports: [GamedataService],
 })
 export class GamedataModule {}

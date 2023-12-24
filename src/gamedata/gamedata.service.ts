@@ -25,6 +25,15 @@ export class GamedataService {
     });
   }
 
+  async getQuestion(party_id: string, question_id: number): Promise<Question> {
+    return await this.questionRepository.findOne({
+      where: {
+        party_id: party_id,
+        question_id: question_id,
+      },
+    });
+  }
+
   async getAnswers(party_id: string, question_id: number): Promise<Option[]> {
     return await this.answerRepository.find({
       where: {

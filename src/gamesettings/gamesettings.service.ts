@@ -33,4 +33,38 @@ export class GamesettingsService {
     async setQuestion(gameid: string, question: string): Promise<void> {
         await this.redisRepo.set(gameid, 'q', question);
     }
+
+    async getQuestionIteration(gameid: string): Promise<number> {
+        const cur = await this.redisRepo.get(gameid, 'i');
+        return parseInt(cur);
+    }
+
+    async setQuestionIteration(gameid: string, iteration: number): Promise<void> {
+        await this.redisRepo.set(gameid, 'i', iteration.toString());
+    }
+
+    async getQuestionRandomFactor(gameid: string): Promise<number> {
+        const cur = await this.redisRepo.get(gameid, 'r');
+        return parseInt(cur);
+    }
+
+    async setQuestionRandomFactor(gameid: string, factor: number): Promise<void> {
+        await this.redisRepo.set(gameid, 'r', factor.toString());
+    }
+
+    async getQuestionCount(gameid: string): Promise<number> {
+        const cur = await this.redisRepo.get(gameid, 'c');
+        return parseInt(cur);
+    }
+
+    async setQuestionCount(gameid: string, count: number): Promise<void> {
+        await this.redisRepo.set(gameid, 'c', count.toString());
+    }
+
+    async getQuestionIndex(gameid: string): Promise<number> {
+        const it = await this.getQuestionIteration(gameid);
+        const factor = await this.getQuestionRandomFactor(gameid);
+        const count = await this.getQuestionCount(gameid);
+        return (it * factor) % count;
+    }
 }

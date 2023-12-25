@@ -4,6 +4,7 @@ import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
   imports: [RedisModule],
-  providers: [GamesettingsService]
+  providers: [GamesettingsService],
+  exports: [GamesettingsService],
 })
 export class GamesettingsModule {}

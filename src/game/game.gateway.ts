@@ -23,20 +23,35 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   handleConnection(client: Socket, ...args: any[]) {
     Logger.log(`Client connected: ${client.id}`);
     this.clientService.saveClient(client.id, client);
+    this.clientService.leaveRoom(client.id, this.clientService.getRoom(client.id));
+    Logger.log(`You are in room: ${this.clientService.getRoom(client.id)}`);
   }
 
   afterInit(server: Socket) {
     Logger.log('Initialized!');
   }
 
-  @SubscribeMessage('message')
+  @SubscribeMessage('host')
+  handleMessage(client: Socket, payload: any): string {
+    const {room, username} = payload;
+  }
+
+  @SubscribeMessage('host')
   handleMessage(client: Socket, payload: any): string {
     if (payload === 'ping') {
       return 'pong';
     }
-    if (payload.type === 'join') {
+    if (payload.type === 'host') {
       const { type, room, username } = payload;
+      Logger.log('A host are trying to create a game...');
+      this.gameService.onJoinGame(client.id, room, 'host');
+      Logger.log(`You are in room: ${this.clientService.getRoom(client.id)}`);
+    }
+    else if (payload.type === 'join') {
+      const { type, room, username } = payload;
+      Logger.log('A player are trying to join...');
       this.gameService.onJoinGame(client.id, room, username);
+      Logger.log(`You are in room: ${this.clientService.getRoom(client.id)}`);
     }
     else if (payload.type === 'start') {
       const { type, room } = payload;
@@ -70,4 +85,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       Logger.log(`Client ${client.id} sent an unknown message: ${payload}`);
     }
   }
+
+
 }

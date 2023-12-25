@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Party } from 'src/entity/party';
 import { Question } from 'src/entity/question';
 import { Option } from 'src/entity/option';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class GamedataService {
@@ -14,6 +16,15 @@ export class GamedataService {
     private questionRepository: Repository<Question>,
     @InjectRepository(Option) private answerRepository: Repository<Option>,
   ) {}
+
+  @RabbitSubscribe({
+    exchange: 'exchange2',
+    routingKey: 'subscribe-route',
+    queue: 'subscribe-queues',
+  })
+  public async pubSubHandler(msg: {}) {
+    console.log(`Received message: ${JSON.stringify(msg)}`);
+  }
 
   async getParty(party_id: string): Promise<Party> {
     return await this.partyRepository.findOne({ where: { id: party_id } });

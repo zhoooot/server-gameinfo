@@ -37,10 +37,10 @@ export class GameService {
     }
 
     onGameStart(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'Let the game begins!', {
-            type: 'start',
-            gamecode: gameCode,
-            questions: this.gamedataService.getQuestions(gameCode),
+        this.clientService.broadcastToRoom(gameCode, 'start', {
+            // type: 'start',
+            // gamecode: gameCode,
+            // questions: this.gamedataService.getQuestions(gameCode),
         });
     }
 

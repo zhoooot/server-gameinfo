@@ -6,10 +6,11 @@ export class ClientList {
     public clientList: {[key: string] : {username: string, data: Socket}} = {};
 
     toArray() {
-        let result = []
-        for (const key in this.clientList) {
-            result.push({key: key, value: this.clientList[key]});
-        }
-        return result;
+        const arr = Object.keys(this.clientList).map(key => ({ key: key, value: this.clientList[key] }));
+        return arr;
+    }
+
+    add(id: string, username: string, data: Socket) {
+        this.clientList[id] = {username: username, data: data};
     }
 }

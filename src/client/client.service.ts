@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { clientData } from './client.data';
 import { ClientList } from './client.list';
@@ -6,66 +6,83 @@ import { ClientList } from './client.list';
 @Injectable()
 export class ClientService {
     constructor(
-        private readonly clientList: ClientList
+        private readonly store: ClientList
     ) {}
 
+    logger = new Logger('ClientService');
+
+    sendMessage(id: string, event: string, data: any) {
+        this.store[id].data.emit(event, data);
+    }
+
     saveClient(id: string, client: Socket) {
-        this.clientList[id] = new clientData('', client);
+        this.store.add(id, '', client);
+        //this.clientList[id] = {username: '', data: client};
+        this.logger.log(`Client ${id} is in room ${this.store.clientList[id].data.rooms.values().next().value}`);
     }
 
     saveClientWithUsername(id: string, username: string, client: Socket) {
-        this.clientList[id] = new clientData(username, client);
+        this.store[id] = new clientData(username, client);
     }
 
     deleteClient(id: string) {
-        delete this.clientList[id];
+        delete this.store[id];
     }
 
     getClient(id: string) {
-        return this.clientList[id];
+        return this.store[id];
     }
 
     getClientList() {
-        return this.clientList;
+        return this.store;
     }
 
     getClientListInRoom(room: string) {
-        return this.clientList.toArray().forEach(client => client.value.data.rooms.has(room));
+        return this.store.toArray().forEach(client => client.value.data.rooms.has(room));
     }
 
     getClientListInRoomExcept(room: string, id: string) {
-        return this.clientList.toArray().forEach(client => client.value.data.rooms.has(room) && client.key !== id);
+        return this.store.toArray().forEach(client => client.value.data.rooms.has(room) && client.key !== id);
     }
 
     broadcastToRoom(room: string, event: string, data: any) {
-        this.clientList.toArray().forEach(client => client.value.data.rooms.has(room) && client.value.data.emit(event, data));
+        this.store.toArray().forEach(client => {
+            if (client.value.data.rooms.has(room)) {
+                client.value.data.emit(event, data)
+            }
+        });
+        console.log("broadcastToRoom", room, event, data)
     }
 
     gotoRoom(id: string, room: string) {
-        this.clientList[id].data.join(room);
+        this.store.clientList[id].data.join(room);
     }
 
     leaveRoom(id: string, room: string) {
-        this.clientList[id].data.leave(room);
+        this.store.clientList[id].data.leave(room);
     }
 
     setClientUsername(id: string, username: string) {
-        this.clientList[id].username = username;
+        this.store.clientList[id].username = username;
     }
 
     getClientUsername(id: string) {
-        return this.clientList[id].username;
+        return this.store.clientList[id].username;
     }
 
     getClientUsernameList() {
-        return this.clientList.toArray().forEach(client => client.value.username);
+        return this.store.toArray().forEach(client => client.value.username);
     }
 
     getClientUsernameListInRoom(room: string) {
-        return this.clientList.toArray().forEach(client => client.value.data.rooms.has(room));
+        return this.store.toArray().forEach(client => client.value.data.rooms.has(room));
     }
 
     getClientUsernameListInRoomExcept(room: string, id: string) {
-        return this.clientList.toArray().forEach(client => client.value.data.rooms.has(room) && client.key !== id);
+        return this.store.toArray().forEach(client => client.value.data.rooms.has(room) && client.key !== id);
+    }
+
+    getRoom(id: string) {
+        return this.store.clientList[id].data.rooms.values().next().value;
     }
 }

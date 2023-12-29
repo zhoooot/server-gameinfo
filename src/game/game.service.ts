@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { Inject, Injectable, ValidationPipe } from '@nestjs/common';
 import { ClientService } from 'src/client/client.service';
 import { GamedataService } from 'src/gamedata/gamedata.service';
 import { GamesettingsService } from 'src/gamesettings/gamesettings.service';
@@ -10,6 +11,7 @@ export class GameService {
         @Inject(ClientService) private readonly clientService: ClientService,
         @Inject(GamedataService) private readonly gamedataService: GamedataService,
         @Inject(GamesettingsService) private readonly gamesettingsService: GamesettingsService,
+        private readonly amqpConnection: AmqpConnection,
     ) {}
 
     createGameCode() {
@@ -21,15 +23,34 @@ export class GameService {
         return gameCode;
     }
 
+    async ifGameCodeExists(gamecode: string): Promise<boolean> {
+        return await this.gamedataService.isGameCodeExists(gamecode);
+    }
+
     async saveGameData(gamecode: string, gamedata: any) {
         const party = await this.gamedataService.saveParty(gamecode, gamedata.title, gamedata.questions);
         return party;
     }
 
-    onJoinGame(clientId: string, gameCode: string, username: string) {
+    onHostGame(clientId: string, gameCode: string, username: string) {
         this.clientService.gotoRoom(clientId, gameCode);
         this.clientService.setClientUsername(clientId, username);
-        this.clientService.broadcastToRoom(gameCode, 'joinGame', {username});
+        this.clientService.broadcastToRoom(gameCode, 'host', {username});
+    }
+
+    onJoinGame(clientId: string, gameCode: string, username: string) {
+        if (this.gamesettingsService.isLocked(gameCode)) {
+            this.clientService.sendMessage(clientId, 'locked', {username});
+            return;
+        }
+        if (this.gamesettingsService.isBanned(gameCode, username)) {
+            this.clientService.sendMessage(clientId, 'banned', {username});
+            return;
+        }
+        this.clientService.gotoRoom(clientId, gameCode);
+        this.clientService.setClientUsername(clientId, username);
+        this.clientService.broadcastToRoom(gameCode, 'join', {username});
+        this.amqpConnection.publish('player-join', 'subscribe-route', {username: username, gamecode: gameCode})
     }
 
     onLeaveGame(clientId: string, gameCode: string) {
@@ -45,14 +66,14 @@ export class GameService {
     }
 
     onGameEnd(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'Game over!', {
+        this.clientService.broadcastToRoom(gameCode, 'end', {
             type: 'end',
             gamecode: gameCode,
         });
     }
 
     onGameSkip(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'This question is skipped!', {
+        this.clientService.broadcastToRoom(gameCode, 'skipped', {
             type: 'skip',
             gamecode: gameCode,
         });
@@ -66,7 +87,7 @@ export class GameService {
     }
 
     async onShowQuestion(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'showQuestion', {
+        this.clientService.broadcastToRoom(gameCode, 'show-question', {
             type: 'showQuestion',
             gamecode: gameCode,
             question: this.gamedataService.getQuestion(gameCode, await this.gamesettingsService.getQuestionIndex(gameCode)),
@@ -81,7 +102,7 @@ export class GameService {
     }
 
     onFinalRanking(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'finalRanking', {
+        this.clientService.broadcastToRoom(gameCode, 'final-ranking', {
             type: 'finalRanking',
             gamecode: gameCode,
         });

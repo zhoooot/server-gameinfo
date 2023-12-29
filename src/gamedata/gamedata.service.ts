@@ -1,11 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, ValidationPipe } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Party } from 'src/entity/party';
 import { Question } from 'src/entity/question';
 import { Option } from 'src/entity/option';
 import { Repository } from 'typeorm';
 import { randomBytes } from 'crypto';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { RabbitmqService } from 'src/rabbitmq/rabbitmq.service';
 
 @Injectable()
@@ -23,7 +23,11 @@ export class GamedataService {
     queue: 'subscribe-queues',
   })
   public async pubSubHandler(msg: {}) {
-    console.log(`Received message: ${JSON.stringify(msg)}`);
+    console.log(msg);
+  }
+
+  async isGameCodeExists(gamecode: string): Promise<boolean> {
+    return await this.partyRepository.findOne({where: {game_code: gamecode}}) != undefined;
   }
 
   async getParty(party_id: string): Promise<Party> {

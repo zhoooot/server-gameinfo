@@ -32,58 +32,57 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('host')
-  handleMessage(client: Socket, payload: any): string {
+  handleHostGame(client: Socket, payload: any): void {
     const {room, username} = payload;
+    this.gameService.onJoinGame(client.id, room, username);
   }
 
-  @SubscribeMessage('host')
-  handleMessage(client: Socket, payload: any): string {
-    if (payload === 'ping') {
-      return 'pong';
-    }
-    if (payload.type === 'host') {
-      const { type, room, username } = payload;
-      Logger.log('A host are trying to create a game...');
-      this.gameService.onJoinGame(client.id, room, 'host');
-      Logger.log(`You are in room: ${this.clientService.getRoom(client.id)}`);
-    }
-    else if (payload.type === 'join') {
-      const { type, room, username } = payload;
-      Logger.log('A player are trying to join...');
-      this.gameService.onJoinGame(client.id, room, username);
-      Logger.log(`You are in room: ${this.clientService.getRoom(client.id)}`);
-    }
-    else if (payload.type === 'start') {
-      const { type, room } = payload;
-      this.gameService.onGameStart(client.id, room);
-    }
-    else if (payload.type === 'question-end') {
-      const { type, room } = payload;
-      this.gameService.onResult(client.id, room);
-    }
-    else if (payload.type === 'question-skip') {
-      const { type, room } = payload;
-      this.gameService.onGameSkip(client.id, room);
-    }
-    else if (payload.type === 'ranking') {
-      const { type, room } = payload;
-      this.gameService.onRanking(client.id, room);
-    }
-    else if (payload.type === 'show-question') {
-      const { type, room } = payload;
-      this.gameService.onShowQuestion(client.id, room);
-    }
-    else if (payload.type === 'final-ranking') {
-      const { type, room } = payload;
-      this.gameService.onFinalRanking(client.id, room);
-    }
-    else if (payload.type === 'leave') {
-      const { type, room } = payload;
-      this.gameService.onLeaveGame(client.id, room);
-    }
-    else {
-      Logger.log(`Client ${client.id} sent an unknown message: ${payload}`);
-    }
+  @SubscribeMessage('join')
+  handleJoinGame(client: Socket, payload: any): void {
+    const {room, username} = payload;
+    this.gameService.onJoinGame(client.id, room, username);
+  }
+
+  @SubscribeMessage('start')
+  handleStartGame(client: Socket, payload: any): void {
+    const {room} = payload;
+    this.gameService.onGameStart(client.id, room);
+  }
+
+  @SubscribeMessage('question-end')
+  handleQuestionEnd(client: Socket, payload: any): void {
+    const {room} = payload;
+    this.gameService.onResult(client.id, room);
+  }
+
+  @SubscribeMessage('question-skip')
+  handleQuestionSkip(client: Socket, payload: any): void {
+    const {room} = payload;
+    this.gameService.onGameSkip(client.id, room);
+  }
+
+  @SubscribeMessage('ranking')
+  handleRanking(client: Socket, payload: any): void {
+    const {room} = payload;
+    this.gameService.onRanking(client.id, room);
+  }
+
+  @SubscribeMessage('show-question')
+  handleShowQuestion(client: Socket, payload: any): void {
+    const {room} = payload;
+    this.gameService.onShowQuestion(client.id, room);
+  }
+
+  @SubscribeMessage('final-ranking')
+  handleFinalRanking(client: Socket, payload: any): void {
+    const {room} = payload;
+    this.gameService.onFinalRanking(client.id, room);
+  }
+
+  @SubscribeMessage('leave')
+  handleLeaveGame(client: Socket, payload: any): void {
+    const {room} = payload;
+    this.gameService.onLeaveGame(client.id, room);
   }
 
 

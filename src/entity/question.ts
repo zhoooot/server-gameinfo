@@ -17,9 +17,15 @@ export class Question {
     public correct_answer: string;
 
     @Column()
+    public time: number;
+
+    @Column()
+    public allow_power: boolean;
+
+    @Column()
     public url: string;
 
-    @OneToMany(() => Option, option => (option.question_id, option.party_id))
+    @OneToMany(() => Option, option => (option.question_id, option.party_id), {cascade: true})
     public options: Option[];
 
     @ManyToOne(() => Party, party => party.questions)

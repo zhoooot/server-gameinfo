@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RabbitmqService } from './rabbitmq.service';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { AmqpConnection, RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
           type: 'fanout',
         },
       ],
-      uri: 'amqps://kkkk@kkkk/upkmrspf',
+      uri: 'amqp://guest:guest@0.0.0.0',
       connectionInitOptions: { wait: false },
       enableControllerDiscovery: true,
       channels: {
@@ -19,10 +19,10 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
           prefetchCount: 15,
           default: true,
         },
-      }
+      },
     }),
   ],
   providers: [RabbitmqService],
-  exports: [RabbitmqService],
+  exports: [RabbitmqService, RabbitMQModule],
 })
 export class RabbitmqModule {}

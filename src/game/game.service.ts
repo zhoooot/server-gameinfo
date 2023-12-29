@@ -15,21 +15,11 @@ export class GameService {
     ) {}
 
     createGameCode() {
-        let gameCode = '';
-        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        for (let i = 0; i < 6; i++) {
-            gameCode += possible.charAt(Math.floor(Math.random() * possible.length));
-        }
-        return gameCode;
+        return this.gamedataService.createGameCode();
     }
 
-    async ifGameCodeExists(gamecode: string): Promise<boolean> {
-        return await this.gamedataService.isGameCodeExists(gamecode);
-    }
-
-    async saveGameData(gamecode: string, gamedata: any) {
-        const party = await this.gamedataService.saveParty(gamecode, gamedata.title, gamedata.questions);
-        return party;
+    ifGameCodeExists(gameCode: string) {
+        return this.gamedataService.isGameCodeExists(gameCode);
     }
 
     onHostGame(clientId: string, gameCode: string, username: string) {

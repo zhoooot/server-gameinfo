@@ -15,10 +15,10 @@ export class Party {
     @Column()
     public title: string;
 
-    @OneToMany(() => Question, question => question.party_id)
+    @OneToMany(() => Question, question => question.party_id, {cascade: true})
     public questions: Question[];
 
-    public Party(party_id: string, game_code: string, invalid_at: string, title: string) {
+    public Party(party_id?: string, game_code?: string, invalid_at?: string, title?: string) {
         this.id = party_id;
         this.game_code = game_code;
         this.invalid_at = invalid_at;

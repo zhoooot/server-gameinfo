@@ -14,87 +14,98 @@ export class GameService {
         private readonly amqpConnection: AmqpConnection,
     ) {}
 
-    createGameCode() {
-        return this.gamedataService.createGameCode();
+    async createGameCode() {
+        let gamecode = this.gamedataService.createGameCode();
+        const randomPrimes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97];
+        await this.gamesettingsService.setQuestionRandomFactor(gamecode, randomPrimes[Math.floor(Math.random() * randomPrimes.length)]);
+        return ;
     }
 
     ifGameCodeExists(gameCode: string) {
         return this.gamedataService.isGameCodeExists(gameCode);
     }
 
-    onHostGame(clientId: string, gameCode: string, username: string) {
-        this.clientService.gotoRoom(clientId, gameCode);
+    async getIdByGameCode(gameCode: string) : Promise<string> {
+        const p = await this.gamedataService.findPartyByGameCode(gameCode);
+        return p.id;
+    }
+
+    async onHostGame(clientId: string, partyid: string, gamecode: string, username: string) {
+        this.clientService.gotoRoom(clientId, partyid);
         this.clientService.setClientUsername(clientId, username);
-        this.clientService.broadcastToRoom(gameCode, 'host', {username});
-    }
-
-    onJoinGame(clientId: string, gameCode: string, username: string) {
-        if (this.gamesettingsService.isLocked(gameCode)) {
-            this.clientService.sendMessage(clientId, 'locked', {username});
-            return;
-        }
-        if (this.gamesettingsService.isBanned(gameCode, username)) {
-            this.clientService.sendMessage(clientId, 'banned', {username});
-            return;
-        }
-        this.clientService.gotoRoom(clientId, gameCode);
-        this.clientService.setClientUsername(clientId, username);
-        this.clientService.broadcastToRoom(gameCode, 'join', {username});
-        this.amqpConnection.publish('player-join', 'subscribe-route', {username: username, gamecode: gameCode})
-    }
-
-    onLeaveGame(clientId: string, gameCode: string) {
-        this.clientService.leaveRoom(clientId, gameCode);
-    }
-
-    onGameStart(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'start', {
-            // type: 'start',
-            // gamecode: gameCode,
-            // questions: this.gamedataService.getQuestions(gameCode),
+        this.clientService.broadcastToRoom(partyid, 'host', {
+            username: username,
+        });
+        this.clientService.sendMessage(clientId, 'host', {
+            question: await this.gamedataService.getQuestionAndAnswers(partyid, await this.gamesettingsService.getQuestionIndex(gamecode)),
         });
     }
 
-    onGameEnd(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'end', {
+    onJoinGame(clientId: string, partyid: string, username: string) {
+        // if (this.gamesettingsService.isLocked(gameCode)) {
+        //     this.clientService.sendMessage(clientId, 'locked', {username});
+        //     return;
+        // }
+        // if (this.gamesettingsService.isBanned(gameCode, username)) {
+        //     this.clientService.sendMessage(clientId, 'banned', {username});
+        //     return;
+        // }
+        this.clientService.gotoRoom(clientId, partyid);
+        this.clientService.setClientUsername(clientId, username);
+        this.clientService.broadcastToRoom(partyid, 'join', {username});
+        //this.amqpConnection.publish('player-join', 'subscribe-route', {username: username, gamecode: gameCode})
+    }
+
+    onLeaveGame(clientId: string, partyid: string) {
+        this.clientService.leaveRoom(clientId, partyid);
+    }
+
+    onGameStart(clientId: string, partyid: string) {
+        this.clientService.broadcastToRoom(partyid, 'start', {
+            type: 'start',
+        });
+    }
+
+    onGameEnd(clientId: string, partyid: string) {
+        this.clientService.broadcastToRoom(partyid, 'end', {
             type: 'end',
-            gamecode: gameCode,
+            partyid: partyid,
         });
     }
 
-    onGameSkip(clientId: string, gameCode: string) {
+    async onGameSkip(clientId: string, gameCode: string) {
+        await this.gamesettingsService.increQuestionIteration(gameCode);
         this.clientService.broadcastToRoom(gameCode, 'skipped', {
             type: 'skip',
             gamecode: gameCode,
         });
     }
 
-    onRanking(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'ranking', {
+    onRanking(clientId: string, partyid: string) {
+        this.clientService.broadcastToRoom(partyid, 'ranking', {
             type: 'ranking',
-            gamecode: gameCode,
+            partyid: partyid,
         });
     }
 
-    async onShowQuestion(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'show-question', {
-            type: 'showQuestion',
-            gamecode: gameCode,
-            question: this.gamedataService.getQuestion(gameCode, await this.gamesettingsService.getQuestionIndex(gameCode)),
+    async onShowQuestion(clientId: string, partyid: string, game_code: string) {
+        this.clientService.broadcastToRoom(partyid, 'show-question', {
+            partyid: partyid,
+            question: await this.gamedataService.getQuestionAndAnswers(partyid, await this.gamesettingsService.getQuestionIndex(game_code)),
         });
     }
 
-    onResult(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'result', {
+    onResult(clientId: string, partyid: string) {
+        this.clientService.broadcastToRoom(partyid, 'result', {
             type: 'result',
-            gamecode: gameCode,
+            gamecode: partyid,
         });
     }
 
-    onFinalRanking(clientId: string, gameCode: string) {
-        this.clientService.broadcastToRoom(gameCode, 'final-ranking', {
+    onFinalRanking(clientId: string, partyid: string) {
+        this.clientService.broadcastToRoom(partyid, 'final-ranking', {
             type: 'finalRanking',
-            gamecode: gameCode,
+            gamecode: partyid,
         });
     }
 }

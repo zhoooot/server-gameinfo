@@ -12,8 +12,9 @@ export class GameController {
         return gamecode
     }
 
-    @Get('/:gamecode')
+    @Get('/check/:gamecode')
     async ifGameCodeExists(@Param('gamecode') gamecode: string) {
+        console.log('A game code is being checked');
         return await this.gameService.ifGameCodeExists(gamecode);
     }
 }

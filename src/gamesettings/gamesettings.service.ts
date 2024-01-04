@@ -43,6 +43,10 @@ export class GamesettingsService {
         await this.redisRepo.set(gameid, 'i', iteration.toString());
     }
 
+    async increQuestionIteration(gameid: string): Promise<void> {
+        await this.redisRepo.increment(gameid, 'i');
+    }
+
     async getQuestionRandomFactor(gameid: string): Promise<number> {
         const cur = await this.redisRepo.get(gameid, 'r');
         return parseInt(cur);

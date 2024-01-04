@@ -32,58 +32,66 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   @SubscribeMessage('host')
-  handleHostGame(client: Socket, payload: any): void {
+  async handleHostGame(client: Socket, payload: any): Promise<void> {
+    console.log("A host is trying to host a game")
     const {room, username} = payload;
-    this.gameService.onJoinGame(client.id, room, username);
+    const pid = await this.gameService.getIdByGameCode(room);
+    this.gameService.onHostGame(client.id, pid, room, username);
   }
 
   @SubscribeMessage('join')
-  handleJoinGame(client: Socket, payload: any): void {
+  async handleJoinGame(client: Socket, payload: any): Promise<void> {
     const {room, username} = payload;
-    this.gameService.onJoinGame(client.id, room, username);
+    const pid = await this.gameService.getIdByGameCode(room);
+    this.gameService.onJoinGame(client.id, pid, username);
   }
 
   @SubscribeMessage('start')
-  handleStartGame(client: Socket, payload: any): void {
+  async handleStartGame(client: Socket, payload: any): Promise<void> {
     const {room} = payload;
-    this.gameService.onGameStart(client.id, room);
+    const pid = await this.gameService.getIdByGameCode(room);
+    this.gameService.onGameStart(client.id, pid);
   }
 
   @SubscribeMessage('question-end')
-  handleQuestionEnd(client: Socket, payload: any): void {
+  async handleQuestionEnd(client: Socket, payload: any): Promise<void> {
     const {room} = payload;
-    this.gameService.onResult(client.id, room);
+    const pid = await this.gameService.getIdByGameCode(room);
+    this.gameService.onResult(client.id, pid);
   }
 
   @SubscribeMessage('question-skip')
-  handleQuestionSkip(client: Socket, payload: any): void {
+  async handleQuestionSkip(client: Socket, payload: any): Promise<void> {
     const {room} = payload;
-    this.gameService.onGameSkip(client.id, room);
+    const pid = await this.gameService.getIdByGameCode(room);
+    await this.gameService.onGameSkip(client.id, pid);
   }
 
   @SubscribeMessage('ranking')
-  handleRanking(client: Socket, payload: any): void {
+  async handleRanking(client: Socket, payload: any): Promise<void> {
     const {room} = payload;
-    this.gameService.onRanking(client.id, room);
+    const pid = await this.gameService.getIdByGameCode(room);
+    this.gameService.onRanking(client.id, pid);
   }
 
   @SubscribeMessage('show-question')
-  handleShowQuestion(client: Socket, payload: any): void {
+  async handleShowQuestion(client: Socket, payload: any): Promise<void> {
     const {room} = payload;
-    this.gameService.onShowQuestion(client.id, room);
+    const pid = await this.gameService.getIdByGameCode(room);
+    this.gameService.onShowQuestion(client.id, pid, room);
   }
 
   @SubscribeMessage('final-ranking')
-  handleFinalRanking(client: Socket, payload: any): void {
+  async handleFinalRanking(client: Socket, payload: any): Promise<void> {
     const {room} = payload;
-    this.gameService.onFinalRanking(client.id, room);
+    const pid = await this.gameService.getIdByGameCode(room);
+    this.gameService.onFinalRanking(client.id, pid);
   }
 
   @SubscribeMessage('leave')
-  handleLeaveGame(client: Socket, payload: any): void {
+  async handleLeaveGame(client: Socket, payload: any): Promise<void> {
     const {room} = payload;
-    this.gameService.onLeaveGame(client.id, room);
+    const pid = await this.gameService.getIdByGameCode(room);
+    this.gameService.onLeaveGame(client.id, pid);
   }
-
-
 }

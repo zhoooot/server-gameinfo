@@ -12,17 +12,23 @@ export class ClientService {
     logger = new Logger('ClientService');
 
     sendMessage(id: string, event: string, data: any) {
-        this.store[id].data.emit(event, data);
+        console.log("Sending message to client", id, event, data);
+        if (this.store.clientList[id] === undefined) {
+            this.logger.log(`Client ${id} is not in the client list`);
+            return;
+        }
+        this.store.clientList[id].data.emit(event, data);
     }
 
     saveClient(id: string, client: Socket) {
-        this.store.add(id, '', client);
+        this.store.clientList[id] = {username: '', data: client};
+        //this.store[id] = new clientData('', client);
         //this.clientList[id] = {username: '', data: client};
         this.logger.log(`Client ${id} is in room ${this.store.clientList[id].data.rooms.values().next().value}`);
     }
 
     saveClientWithUsername(id: string, username: string, client: Socket) {
-        this.store[id] = new clientData(username, client);
+        this.store.clientList[id] = new clientData(username, client);
     }
 
     deleteClient(id: string) {

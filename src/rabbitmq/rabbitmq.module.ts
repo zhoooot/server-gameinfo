@@ -10,6 +10,10 @@ import { AmqpConnection, RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
           name: 'exchange2',
           type: 'fanout',
         },
+        {
+          name: 'game-created',
+          type: 'fanout',
+        },
       ],
       uri: 'amqp://guest:guest@0.0.0.0',
       connectionInitOptions: { wait: false },

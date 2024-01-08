@@ -3,6 +3,7 @@ import { RedisRepository } from './redis.repo';
 
 @Injectable()
 export class RedisService {
-    constructor(@Inject(RedisRepository) private readonly redisRepository: RedisRepository) {}
-
+  constructor(
+    @Inject(RedisRepository) private readonly redisRepository: RedisRepository,
+  ) {}
 }

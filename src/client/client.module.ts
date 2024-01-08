@@ -5,6 +5,6 @@ import { ClientList } from './client.list';
 @Module({
   imports: [Object],
   providers: [ClientService, ClientList],
-  exports: [ClientService]
+  exports: [ClientService],
 })
 export class ClientModule {}

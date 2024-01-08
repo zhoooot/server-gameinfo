@@ -1,48 +1,52 @@
-import { Column, Entity, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { Question } from "./question";
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { Question } from './question';
 
 @Entity()
 export class Party {
-    @PrimaryColumn()
-    public id: string;
+  @PrimaryColumn()
+  public id: string;
 
-    @Column()
-    public game_code: string;
+  @Column()
+  public game_code: string;
 
-    @Column()
-    public invalid_at: string;
+  @Column()
+  public invalid_at: string;
 
-    @Column()
-    public title: string;
+  @Column()
+  public title: string;
 
-    @OneToMany(() => Question, question => question.party_id, {cascade: true})
-    public questions: Question[];
+  @OneToMany(() => Question, (question) => question.party_id, { cascade: true })
+  public questions: Question[];
 
-    public Party(party_id?: string, game_code?: string, invalid_at?: string, title?: string) {
-        this.id = party_id;
-        this.game_code = game_code;
-        this.invalid_at = invalid_at;
-        this.title = title;
-    }
+  public Party(
+    party_id?: string,
+    game_code?: string,
+    invalid_at?: string,
+    title?: string,
+  ) {
+    this.id = party_id;
+    this.game_code = game_code;
+    this.invalid_at = invalid_at;
+    this.title = title;
+  }
 
-    public getId(): string {
-        return this.id;
-    }
+  public getId(): string {
+    return this.id;
+  }
 
-    public getGameCode(): string {
-        return this.game_code;
-    }
+  public getGameCode(): string {
+    return this.game_code;
+  }
 
-    public getInvalidAt(): string {
-        return this.invalid_at;
-    }
+  public getInvalidAt(): string {
+    return this.invalid_at;
+  }
 
-    public getTitle(): string {
-        return this.title;
-    }
+  public getTitle(): string {
+    return this.title;
+  }
 
-    public getQuestions(): Question[] {
-        return this.questions;
-    }
-
+  public getQuestions(): Question[] {
+    return this.questions;
+  }
 }

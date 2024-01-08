@@ -1,4 +1,4 @@
-import { Inject, Injectable, ValidationPipe } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Party } from 'src/entity/party';
 import { Question } from 'src/entity/question';
@@ -20,14 +20,14 @@ export class GamedataService {
   ) {}
 
   @RabbitSubscribe({
-    exchange: 'exchange2',
-    routingKey: 'subscribe-route',
+    exchange: 'game',
+    routingKey: 'game.create',
     queueOptions: {
       durable: true,
       autoDelete: true,
     },
   })
-  public async getGameData(data: {}) {
+  public async getGameData(data: Record<string, any>) {
     console.log(data);
     const party = new Party();
     party.id = randomBytes(16).toString('hex');
@@ -63,7 +63,10 @@ export class GamedataService {
       party.game_code,
       primes[Math.floor(Math.random() * primes.length)],
     );
-    await this.gameSettingsService.setQuestionCount(party.game_code, questions.length);
+    await this.gameSettingsService.setQuestionCount(
+      party.game_code,
+      questions.length,
+    );
     await this.gameSettingsService.setQuestionIteration(party.game_code, 0);
     await this.partyRepository.save(party);
     await this.amqpConnection.publish('game-created', 'subscribe-route', {
@@ -136,7 +139,14 @@ export class GamedataService {
       allow_power: question.allow_power,
       url: question.url,
       answers: answers,
-      correct_answer: ((question.correct_answer == 'A') ? 1 : (question.correct_answer == 'B') ? 2 : (question.correct_answer == 'C') ? 3 : 4),
+      correct_answer:
+        question.correct_answer == 'A'
+          ? 1
+          : question.correct_answer == 'B'
+            ? 2
+            : question.correct_answer == 'C'
+              ? 3
+              : 4,
     };
   }
 

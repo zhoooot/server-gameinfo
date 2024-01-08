@@ -11,7 +11,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Party } from './entity/party';
 import { Question } from './entity/question';
 import { Option } from './entity/option';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import dataSourceConfig from './typeorm.config';
 
 @Module({
   imports: [
@@ -22,14 +22,7 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
     GameModule,
     GamesettingsModule,
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'zhoot',
-      password: 'pass',
-      database: 'game',
-      synchronize: true,
-      logging: true,
+      ...dataSourceConfig,
       entities: [Party, Question, Option],
     }),
   ],

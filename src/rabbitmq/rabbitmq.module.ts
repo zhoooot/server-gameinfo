@@ -1,29 +1,18 @@
 import { Module } from '@nestjs/common';
 import { RabbitmqService } from './rabbitmq.service';
-import { AmqpConnection, RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { RABBITMQ_URL } from 'src/config';
 
 @Module({
   imports: [
     RabbitMQModule.forRoot(RabbitMQModule, {
       exchanges: [
         {
-          name: 'exchange2',
-          type: 'fanout',
-        },
-        {
-          name: 'game-created',
+          name: 'game',
           type: 'fanout',
         },
       ],
-      uri: 'amqp://guest:guest@0.0.0.0',
-      connectionInitOptions: { wait: false },
-      enableControllerDiscovery: true,
-      channels: {
-        'channel-1': {
-          prefetchCount: 15,
-          default: true,
-        },
-      },
+      uri: RABBITMQ_URL,
     }),
   ],
   providers: [RabbitmqService],

@@ -1,1 +1,1 @@
-export { JoinMessage } from "./join.message";
+export { JoinMessage } from './join.message';

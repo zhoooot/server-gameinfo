@@ -71,6 +71,13 @@ export class GamesettingsService {
     const it = await this.getQuestionIteration(gameid);
     const factor = await this.getQuestionRandomFactor(gameid);
     const count = await this.getQuestionCount(gameid);
+    console.log('The index generated is ', (it * factor) % count);
     return (it * factor) % count;
+  }
+
+  async ifGameEnds(gameid: string): Promise<boolean> {
+    const it = await this.getQuestionIteration(gameid);
+    const count = await this.getQuestionCount(gameid);
+    return it >= count;
   }
 }

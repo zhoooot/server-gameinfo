@@ -149,44 +149,4 @@ export class GamedataService {
               : 4,
     };
   }
-
-  // async saveParty(
-  //   party_id: string,
-  //   game_code: string,
-  //   title: string,
-  //   questions: Question[],
-  // ): Promise<Party> {
-  //   const party = new Party();
-  //   party.id = party_id;
-  //   party.game_code = game_code;
-  //   party.title = title;
-  //   const tommorow = new Date().setDate(new Date().getDate() + 1);
-  //   party.invalid_at = tommorow.toString();
-  //   party.questions = questions;
-  //   for (let i = 0; i < questions.length; i++) {
-  //       const question = new Question();
-  //       question.question_id = i;
-  //       question.party_id = party.id;
-  //       question.content = questions[i].content;
-  //       question.correct_answer = questions[i].correct_answer;
-  //       question.url = questions[i].url;
-  //       question.party = party;
-  //       question.options = questions[i].options;
-  //       await this.questionRepository.save(question);
-  //       for (let j = 0; j < questions[i].options.length; j++) {
-  //           const option = new Option();
-  //           option.question_id = i
-  //           option.party_id = party.id;
-  //           option.option_id = j;
-  //           option.content = questions[i].options[j].content;
-  //           option.question = questions[i];
-  //           await this.answerRepository.save(option);
-  //       }
-  //   }
-  //   return await this.partyRepository.save(party);
-  // }
-
-  async saveParty(party: Party): Promise<Party> {
-    return await this.partyRepository.save(party);
-  }
 }
